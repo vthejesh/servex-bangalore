@@ -9,7 +9,7 @@ export const AstraCosmicBackground: React.FC = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
 
     let animationFrameId: number;
@@ -22,86 +22,62 @@ export const AstraCosmicBackground: React.FC = () => {
       height = canvas.height = window.innerHeight;
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
 
-    // Particle Swirl settings matching OpenAI GPT Astra screenshot
-    const numParticles = 350;
-    const particles: {
-      arm: number;
-      dist: number;
-      angle: number;
-      speed: number;
-      size: number;
-      alpha: number;
-      color: string;
-    }[] = [];
+    // Optimized particle count for butter-smooth 60FPS performance
+    const numParticles = 140;
+    const colors = ['#f97316', '#f59e0b', '#0ea5e9', '#ec4899', '#ffffff', '#10b981'];
 
-    // Vibrant Palette colors matching user request (Orange, Amber, Sky Blue, Pink, White, Gold)
-    const colors = [
-      '#f97316', // Vibrant Orange
-      '#f59e0b', // Warm Amber Gold
-      '#0ea5e9', // Sky Blue
-      '#ec4899', // Bright Pink
-      '#ffffff', // Crisp White
-      '#10b981', // Emerald Green
-    ];
-
-    for (let i = 0; i < numParticles; i++) {
-      const arm = Math.floor(Math.random() * 3); // 3 spiral arms
-      const dist = Math.pow(Math.random(), 1.5) * Math.min(width, height) * 0.45 + 10;
-      const angle = Math.random() * Math.PI * 2;
-      const speed = (0.0005 + Math.random() * 0.001) * (1 / (dist * 0.02 + 1));
-      const size = Math.random() * 2.2 + 0.6;
-      const alpha = Math.random() * 0.8 + 0.2;
-      const color = colors[Math.floor(Math.random() * colors.length)];
-
-      particles.push({ arm, dist, angle, speed, size, alpha, color });
-    }
+    const particles = Array.from({ length: numParticles }, () => {
+      const dist = Math.pow(Math.random(), 1.6) * Math.min(width, height) * 0.45 + 15;
+      return {
+        dist,
+        angle: Math.random() * Math.PI * 2,
+        speed: (0.0006 + Math.random() * 0.0008) * (1 / (dist * 0.015 + 1)),
+        size: Math.random() * 2.2 + 0.8,
+        alpha: Math.random() * 0.7 + 0.3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+      };
+    });
 
     let globalRotation = 0;
 
     const render = () => {
-      ctx.fillStyle = 'rgba(7, 10, 18, 0.25)'; // Deep cosmic dark charcoal trailing
+      ctx.fillStyle = '#070a12'; // Deep space background fill
       ctx.fillRect(0, 0, width, height);
 
       const centerX = width / 2;
-      const centerY = height * 0.42;
+      const centerY = height * 0.4;
 
-      globalRotation += 0.0015;
+      globalRotation += 0.0012;
 
-      // Draw glowing central core
-      const coreGlow = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 180);
-      coreGlow.addColorStop(0, 'rgba(249, 115, 22, 0.25)'); // Orange core
-      coreGlow.addColorStop(0.4, 'rgba(14, 165, 233, 0.12)'); // Sky blue halo
+      // Render glow core
+      const coreGlow = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 200);
+      coreGlow.addColorStop(0, 'rgba(249, 115, 22, 0.22)');
+      coreGlow.addColorStop(0.5, 'rgba(14, 165, 233, 0.1)');
       coreGlow.addColorStop(1, 'rgba(7, 10, 18, 0)');
       ctx.fillStyle = coreGlow;
       ctx.beginPath();
-      ctx.arc(centerX, centerY, 180, 0, Math.PI * 2);
+      ctx.arc(centerX, centerY, 200, 0, Math.PI * 2);
       ctx.fill();
 
-      // Render cosmic spiral arm particles
-      particles.forEach((p) => {
+      // Render high-performance cosmic particles
+      for (let i = 0; i < numParticles; i++) {
+        const p = particles[i];
         p.angle += p.speed;
 
-        // Spiral logarithmic curve offset
-        const spiralAngle = p.angle + globalRotation + (p.dist * 0.008);
+        const spiralAngle = p.angle + globalRotation + p.dist * 0.006;
         const x = centerX + Math.cos(spiralAngle) * p.dist;
-        const y = centerY + Math.sin(spiralAngle) * (p.dist * 0.65); // Elliptical tilt
+        const y = centerY + Math.sin(spiralAngle) * (p.dist * 0.65);
 
-        ctx.save();
         ctx.globalAlpha = p.alpha;
         ctx.fillStyle = p.color;
-
-        // Glowing particle effect
-        ctx.shadowBlur = p.size > 1.8 ? 10 : 4;
-        ctx.shadowColor = p.color;
-
         ctx.beginPath();
         ctx.arc(x, y, p.size, 0, Math.PI * 2);
         ctx.fill();
-        ctx.restore();
-      });
+      }
 
+      ctx.globalAlpha = 1.0;
       animationFrameId = requestAnimationFrame(render);
     };
 

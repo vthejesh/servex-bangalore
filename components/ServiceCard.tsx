@@ -1,10 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { memo } from 'react';
 import { ServiceItem } from '@/types';
 import { 
   Star, 
-  Users, 
   ArrowRight, 
   Wrench, 
   Zap, 
@@ -98,7 +97,7 @@ interface ServiceCardProps {
   onDeleteService: (serviceId: string) => void;
 }
 
-export const ServiceCard: React.FC<ServiceCardProps> = ({
+export const ServiceCard = memo<ServiceCardProps>(({
   service,
   onBookNow,
   onEditService,
@@ -109,21 +108,21 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   return (
     <div className="bg-slate-900/90 backdrop-blur-md rounded-3xl border border-slate-800 hover:border-orange-500/50 shadow-xl hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden group">
       <div>
-        {/* Top Header Card Bar */}
+        {/* Card Header */}
         <div className="p-5 pb-3">
           <div className="flex items-start justify-between gap-3 mb-3">
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-orange-400 group-hover:text-amber-300 group-hover:scale-110 transition-transform border border-slate-700/60 shadow-inner">
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-orange-400 group-hover:text-amber-300 group-hover:scale-105 transition-transform border border-slate-700/60 shadow-inner">
               <IconComponent className="w-6 h-6" />
             </div>
 
             <div className="flex items-center gap-1.5">
-              {/* Rating */}
+              {/* Rating Badge */}
               <div className="flex items-center gap-1 bg-amber-500/10 text-amber-300 px-2.5 py-1 rounded-xl border border-amber-500/30 text-xs font-bold">
                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                 <span>{service.rating.toFixed(1)}</span>
               </div>
 
-              {/* Edit Button */}
+              {/* Edit Action */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -135,16 +134,16 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
                 <Edit3 className="w-3.5 h-3.5 text-sky-400" />
               </button>
 
-              {/* Delete Button */}
+              {/* Delete Action */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (confirm(`Are you sure you want to remove "${service.title}" from the catalog?`)) {
+                  if (confirm(`Are you sure you want to remove "${service.title}"?`)) {
                     onDeleteService(service.id);
                   }
                 }}
                 className="p-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 transition-colors"
-                title="Delete service from catalog"
+                title="Delete service"
               >
                 <Trash2 className="w-3.5 h-3.5 text-rose-400" />
               </button>
@@ -174,7 +173,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
         </div>
       </div>
 
-      {/* Footer Pricing in ₹ & Action */}
+      {/* Footer Price & Action */}
       <div className="p-5 pt-3 bg-slate-950/70 border-t border-slate-800/80 flex items-center justify-between gap-3">
         <div>
           <span className="text-[10px] text-slate-400 block uppercase font-bold">Bangalore Price</span>
@@ -194,4 +193,6 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
       </div>
     </div>
   );
-};
+});
+
+ServiceCard.displayName = 'ServiceCard';
